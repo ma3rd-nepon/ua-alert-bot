@@ -3,9 +3,12 @@ from dotenv import dotenv_values
 import subprocess
 import jwt
 import random
+from PIL import Image
 
 config = dotenv_values(".env")
-
+regions = [(162, 116), (252, 132), (350, 150), (450, 125), (462, 168), (555, 92), (680, 142), (85, 243), (190, 260), (261, 261), 
+            (270, 256), (380, 310), (533, 263), (647, 233), (788, 250), (930, 296), (565, 341), (703, 350), (862, 359), (460, 455), 
+            (648, 477), (750, 470), (53, 358), (145, 344), (184, 363)]
 
 def gfc(name):
     try:
@@ -65,3 +68,17 @@ def jwt_code(msg):
         return result[::-1]
     except Exception as e:
         return str(e)
+
+
+def check_map():
+    im = Image.open('other/map.png')
+    rgb_im = im.convert('RGB')
+    alerts = 0
+
+    for i in regions:
+        r, g, b = rgb_im.getpixel(i)
+        if r == 221:
+            alerts += 1
+        else:
+            pass
+    return alerts >= 5

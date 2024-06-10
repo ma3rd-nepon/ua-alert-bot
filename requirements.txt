@@ -7,3 +7,4 @@ requests==2.31.0
 TgCrypto==1.2.5
 tzdata==2024.1
 tzlocal==5.2
+pillow==10.2.0

@@ -17,6 +17,7 @@ interval = 43200
 schedule_text = "/grow"
 image = "other/map.png"
 ADM_LIST = [1242755674]
+main_chat = -1001972773156
 
 
 def filter_startwith(query):
@@ -31,14 +32,25 @@ def filter_startwith(query):
 
 
 async def grow():
-    await client.send_message(chat_id=-1001972773156,
+    await client.send_message(chat_id=main_chat,
                               text=schedule_text)
+
 
 def download_map():
     img = requests.get("https://alerts.com.ua/map.png").content
     with open("other/map.png", "wb+") as file:
         file.write(img)
     print("new map downloaded")
+
+
+async def check_alerts():
+    if check_map():
+        file_id = "CAACAgIAAxkBAAEMSHlmZvlpuLQ-rNav_OWTXkOMWLQnzgACyB8AAoxioUroPLLHdVTODjUE"
+    else:
+        file_id = "CAACAgIAAxkBAAEMSHtmZvmBzqSsB-nN4Y1JZzsBc7c2XQACZR4AAkqJoUp24XobBmy_JDUE"
+
+    await client.send_sticker(chat_id=main_chat, sticker=file_id)
+
 
 @client.on_message(filters.command("start", prefix)) # старт
 async def greetings(_, message):
@@ -129,8 +141,9 @@ async def bash_term(_, message):
 
 
 scheduler = AsyncIOScheduler() 
-scheduler.add_job(grow, "interval", seconds=interval)
+# scheduler.add_job(grow, "interval", seconds=interval)
 scheduler.add_job(download_map, "interval", seconds=60)
+scheduler.add_job(check_alerts, "interval", seconds=180)
 
 download_map()
 
