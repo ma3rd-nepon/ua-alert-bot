@@ -1,0 +1,9 @@
+APScheduler==3.10.4
+httpx==0.26.0
+PyJWT==2.8.0
+Pyrogram==2.0.106
+python-dotenv==1.0.1
+requests==2.31.0
+TgCrypto==1.2.5
+tzdata==2024.1
+tzlocal==5.2
