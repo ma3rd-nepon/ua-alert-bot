@@ -17,7 +17,7 @@ interval = 43200
 schedule_text = "/grow"
 image = "other/map.png"
 ADM_LIST = [1242755674]
-main_chat = -1001972773156
+main_chat = gfc("main_chat")
 alert = False
 
 
@@ -154,13 +154,13 @@ async def bash_term(_, message):
     exit()
 
 
-scheduler = AsyncIOScheduler() 
+# scheduler = AsyncIOScheduler() 
 # scheduler.add_job(grow, "interval", seconds=interval)
-scheduler.add_job(download_map, "interval", seconds=60)
+# scheduler.add_job(download_map, "interval", seconds=60)
 # scheduler.add_job(check_alerts, "interval", seconds=180)
 
-download_map()
+# download_map()
 
 print("alert bot started work")
-scheduler.start()
+# scheduler.start()
 client.run()

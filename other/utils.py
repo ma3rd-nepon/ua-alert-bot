@@ -97,5 +97,5 @@ def check_regions():
     response = requests.get(f"{base_url}/api/v3/alerts", headers=headers).json()
 
     if len(response) >= 10:
-        return region["regionName"] for region in response
+        return [region["regionName"] for region in response]
     return False
