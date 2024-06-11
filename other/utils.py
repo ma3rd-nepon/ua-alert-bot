@@ -7,23 +7,25 @@ import requests
 from PIL import Image
 
 config = dotenv_values(".env")
-regions = [(162, 116), (252, 132), (350, 150), (450, 125), (462, 168), (555, 92), (680, 142), (85, 243), (190, 260), (261, 261), 
-            (270, 256), (380, 310), (533, 263), (647, 233), (788, 250), (930, 296), (565, 341), (703, 350), (862, 359), (460, 455), 
-            (648, 477), (750, 470), (53, 358), (145, 344), (184, 363)]
-
-headers = {
-    "accept": "application/json",
-    "Authorization": "f11822be:ca47c2aaa59fbb9d876a9909fdd8942d"
-}
-
-base_url = "api.ukrainealarm.com"
-
 
 def gfc(name):
     try:
         return config[name]
     except KeyError:
         return "not found"
+
+
+regions = [(162, 116), (252, 132), (350, 150), (450, 125), (462, 168), (555, 92), (680, 142), (85, 243), (190, 260), (261, 261), 
+            (270, 256), (380, 310), (533, 263), (647, 233), (788, 250), (930, 296), (565, 341), (703, 350), (862, 359), (460, 455), 
+            (648, 477), (750, 470), (53, 358), (145, 344), (184, 363)]
+
+headers = {
+    "accept": "application/json",
+    "Authorization": gfc("ukrainealarm_token")
+}
+
+base_url = "api.ukrainealarm.com"
+
         
 comm_pref = gfc("prefix")
 prefix = "/"
