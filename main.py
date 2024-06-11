@@ -18,6 +18,7 @@ schedule_text = "/grow"
 image = "other/map.png"
 ADM_LIST = [1242755674]
 main_chat = -1001972773156
+alert = False
 
 
 def filter_startwith(query):
@@ -44,12 +45,18 @@ def download_map():
 
 
 async def check_alerts():
-    if check_map():
+    if check_regions() and not alert:
         file_id = "CAACAgIAAxkBAAEMSHlmZvlpuLQ-rNav_OWTXkOMWLQnzgACyB8AAoxioUroPLLHdVTODjUE"
-    else:
+        alert = True
+
+        await client.send_sticker(chat_id=main_chat, sticker=file_id)
+
+    elif alert and not check_regions():
         file_id = "CAACAgIAAxkBAAEMSHtmZvmBzqSsB-nN4Y1JZzsBc7c2XQACZR4AAkqJoUp24XobBmy_JDUE"
 
-    await client.send_sticker(chat_id=main_chat, sticker=file_id)
+        alert = False
+
+        await client.send_sticker(chat_id=main_chat, sticker=file_id)
 
 
 @client.on_message(filters.command("start", prefix)) # старт
@@ -140,10 +147,17 @@ async def bash_term(_, message):
     return await message.reply(terminal(message.text.split(" ", maxsplit=1)[1]))
 
 
+@client.on_message(filters.command("exit", comm_pref)) # вийти в окно
+async def bash_term(_, message):
+    if message.from_user.id not in ADM_LIST:
+        return await message.reply("нэээээд")
+    exit()
+
+
 scheduler = AsyncIOScheduler() 
 # scheduler.add_job(grow, "interval", seconds=interval)
 scheduler.add_job(download_map, "interval", seconds=60)
-scheduler.add_job(check_alerts, "interval", seconds=180)
+# scheduler.add_job(check_alerts, "interval", seconds=180)
 
 download_map()
 
