@@ -1,24 +1,31 @@
 from pyrogram import *
 from pyrogram.errors import MessageTooLong
 from apscheduler.schedulers.asyncio import AsyncIOScheduler 
-from other.utils import *
+from src.utils.utils import *
 from io import BytesIO
 
 import requests
+import json
 
 client = Client(name=gfc("name"),
                 api_id=gfc("api_id"),
                 api_hash=gfc("api_hash"),
-                bot_token=gfc("bot_token"))
+                bot_token=gfc("bot_token")
+        )
 
 prefix = "/"
 comm_pref = gfc("prefix")
 interval = 43200
 schedule_text = "/grow"
-image = "other/map.png"
-ADM_LIST = [1242755674]
+image = "assets/map.png"
+ADM_LIST = [] # Your User IDs admins
 main_chat = gfc("main_chat")
 alert = False
+maps_site = "https://alerts.com.ua/map.png" # UNAVAIABLE SITE 
+file_id_idk = "CAACAgIAAxkBAAMPZmWivOBjcNMsqZQ_gBH1j3eMYvEAAkciAALYQahKjCShe_CVt-seBA"
+
+with open("src/utils/ukraine_language.json", "r", encoding="utf-8") as f:
+    lang = json.load(f)
 
 
 def filter_startwith(query):
@@ -38,48 +45,51 @@ async def grow():
 
 
 def download_map():
-    img = requests.get("https://alerts.com.ua/map.png").content
-    with open("other/map.png", "wb+") as file:
+    img = requests.get(maps_site).content
+    with open("assets/map.png", "wb+") as file:
         file.write(img)
-    print("new map downloaded")
+    # logging.debug("New map downloaded")
 
 
 async def check_alerts():
     if check_regions() and not alert:
-        file_id = "CAACAgIAAxkBAAEMSHlmZvlpuLQ-rNav_OWTXkOMWLQnzgACyB8AAoxioUroPLLHdVTODjUE"
+        file_id = file_id_idk
         alert = True
 
         await client.send_sticker(chat_id=main_chat, sticker=file_id)
 
     elif alert and not check_regions():
-        file_id = "CAACAgIAAxkBAAEMSHtmZvmBzqSsB-nN4Y1JZzsBc7c2XQACZR4AAkqJoUp24XobBmy_JDUE"
+        file_id = file_id_idk
 
         alert = False
 
         await client.send_sticker(chat_id=main_chat, sticker=file_id)
 
 
-@client.on_message(filters.command("start", prefix)) # старт
+@client.on_message(filters.command("start", prefix))
 async def greetings(_, message):
-    return await message.reply(f"Вітаю {message.from_user.first_name}! я бот для відправки стікерів під час алерту")
+    return await message.reply(lang["greeting"])
 
 
-@client.on_message(filters.command("map", prefix)) # карта тревог
+@client.on_message(filters.command("map", prefix))
 async def send_map_alerts(_, message):
+    """Reply a alert map"""
     return await client.send_photo(chat_id=message.chat.id, photo=image)
 
 
-@client.on_message(filters.command("sticker", prefix)) # сенд стикер через филе ид
+@client.on_message(filters.command("sticker", prefix))
 async def send_sticker_by_file_id(_, message):
+    """Send sticker through File ID"""
     try:
         file_id = message.text.split(" ", maxsplit=1)[1]
     except:
-        file_id = "CAACAgIAAxkBAAMPZmWivOBjcNMsqZQ_gBH1j3eMYvEAAkciAALYQahKjCShe_CVt-seBA"
+        file_id = file_id_idk
     return await client.send_sticker(chat_id=message.chat.id, sticker=file_id)
 
 
-@client.on_message(filters.command("message", comm_pref)) # мессаге жсон
+@client.on_message(filters.command("message", comm_pref))
 async def send_msg_json(_, message):
+    """Reply a message.json"""
     try:
         text = "```json" + str(message) + "```"
         return await message.reply(text)
@@ -90,8 +100,9 @@ async def send_msg_json(_, message):
         return await client.send_document(chat_id=message.chat.id, document=f"messages/{filename}.txt")
 
 
-@client.on_message(filters.command("file_id", prefix)) # сенд филе ид
+@client.on_message(filters.command("file_id", prefix))
 async def get_file_id(_, message):
+    """Send File ID"""
     m = message.reply_to_message
     typ = message.reply_to_message.media
     if "sticker" in str(typ).lower():
@@ -107,50 +118,51 @@ file ID: {m.file_id}
     return await message.reply(answer)
 
 
-@client.on_message(filter_startwith("команды")) # команды ало
+@client.on_message(filter_startwith(lang["commands"]["list"]))
 async def send_commands_bot(_, message):
+    """Reply a command list"""
     answer = await commands_list()
     return await message.reply(answer)
 
 
-@client.on_message(filter_startwith("хрюка"))
+@client.on_message(filter_startwith(lang["commands"]["stable"]))
 async def check_bot_working(_, message):
-    return await message.reply("нахрюкиваю у джакузи")
+    return await message.reply(lang["answers"]["stable"])
 
 
-@client.on_message(filter_startwith("schedule")) # ижменение данных таска
+@client.on_message(filter_startwith(lang["commands"]["task"]))
 async def change_interval(_, message):
     """not works yet.\nneed to restart the grow task"""
     global schedule_text, interval
-    if message.from_user.id != 1242755674:
+    if message.from_user.id not in ADM_LIST:
         return
-    if "интервал" in message.text:
+    if lang["commands"]["interval"] in message.text:
         try:
             text = int(message.text.split(" ", maxsplit=2)[2])
         except:
             text = 43200
         interval = text
-        return await message.reply(f"interval grow changed to {text}")
-    elif "текст" in message.text:
+        return await message.reply(f"{lang["answers"]["interval_change"]} {text}")
+    elif lang["commands"]["text"] in message.text:
         try:
             text = message.text.split(" ", maxsplit=2)[2]
         except:
             text = "/grow"
         schedule_text = text
-        return await message.reply(f"text changed to {text}")
+        return await message.reply(f"{lang["answers"]["text_change"]} {text}")
 
 
-@client.on_message(filters.command("bash", comm_pref)) # тэрминал
+@client.on_message(filters.command(lang["commands"]["terminal"], comm_pref)) # тэрминал
 async def bash_term(_, message):
     if message.from_user.id not in ADM_LIST:
-        return await message.reply("нэээээд")
+        return await message.reply(lang["answers"]["unavaiable"])
     return await message.reply(terminal(message.text.split(" ", maxsplit=1)[1]))
 
 
-@client.on_message(filters.command("exit", comm_pref)) # вийти в окно
+@client.on_message(filters.command(lang["answers"]["exit"], comm_pref)) # вийти в окно
 async def bash_term(_, message):
     if message.from_user.id not in ADM_LIST:
-        return await message.reply("нэээээд")
+        return await message.reply(lang["answers"]["unavaiable"])
     exit()
 
 
@@ -161,6 +173,6 @@ async def bash_term(_, message):
 
 # download_map()
 
-print("alert bot started work")
+# logging.debug("Alert bot launched")
 # scheduler.start()
 client.run()

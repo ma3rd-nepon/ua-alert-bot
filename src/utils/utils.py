@@ -82,7 +82,7 @@ def jwt_code(msg):
 
 
 def check_map():
-    im = Image.open('other/map.png')
+    im = Image.open('assets/map.png')
     rgb_im = im.convert('RGB')
     alerts = 0
 
