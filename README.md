@@ -40,7 +40,7 @@ The source code remains available for reference and educational purposes only. N
 
 ```bash
 
-git clone https://github.com/yourname/telegram-bot.git
+git clone https://github.com/ma3rd-nepon/ua-alert-bot.git
 
 cd ua-alert-bot
 
